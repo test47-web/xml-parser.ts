@@ -63,7 +63,7 @@ You can also install `xml-parser.ts` with [pnpm](https://pnpm.io/), [yarn](https
 ## Usage Example
 
 ```typescript
-import { xml_to_json } from 'xml-parser.ts'
+import { xml_to_json, json_to_xml } from 'xml-parser.ts'
 
 const xml = `
 <annotation>
@@ -84,11 +84,16 @@ const xml = `
 </annotation>
 `
 
+// Parse XML to JavaScript object
 const result = xml_to_json(xml)
 console.log(result)
+
+// Convert back to XML
+const regeneratedXml = json_to_xml(result)
+console.log(regeneratedXml == xml) // output true
 ```
 
-Output:
+Converted JavaScript object:
 
 ```javascript
 {
@@ -127,7 +132,7 @@ Output:
 
 ## TypeScript Signature
 
-### Core Function
+### Core Functions
 
 ```typescript
 /**
@@ -142,6 +147,28 @@ Output:
  * @throws Error if the XML is invalid or malformed
  */
 export function xml_to_json(xml: string): Record<string, any>
+
+/**
+ * Convert JavaScript object to XML string.
+ *
+ * Converts object properties to XML elements using property names as tag names.
+ * String and number values become text content.
+ * Arrays create multiple elements with the same tag name.
+ * Nested objects create nested XML elements.
+ *
+ * @param object - The JavaScript object to convert
+ * @param options - Formatting options for the XML output
+ * @returns XML string representation of the object
+ */
+export function json_to_xml(
+  object: Record<string, any>,
+  options?: {
+    /** default `''` */
+    initial_indent?: string
+    /** default `'  '` (2 spaces) */
+    indent_step?: string
+  },
+): string
 ```
 
 ### Helper Functions

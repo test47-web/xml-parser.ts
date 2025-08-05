@@ -84,6 +84,138 @@ export function xml_to_json(xml: string) {
   return Object.fromEntries(properties)
 }
 
+/**
+ * Convert JavaScript object to XML string.
+ *
+ * @description
+ * - Object properties become XML elements using property names as tag names.
+ * - String and number values become text content.
+ * - Arrays create multiple elements with the same tag name.
+ * - Nested objects create nested XML elements.
+ * - Empty objects create self-closing elements.
+ *
+ * @example
+ * JavaScript object:
+ * ```javascript
+ * {
+ *   annotation: {
+ *     folder: "images",
+ *     filename: "maksssksksss0.png",
+ *     size: {
+ *       width: 512,
+ *       height: 366,
+ *     },
+ *     object: [
+ *       { x: 79, y: 105 },
+ *       { x: 185, y: 100 }
+ *     ]
+ *   }
+ * }
+ * ```
+ *
+ * Generated XML:
+ * ```xml
+ * <annotation>
+ *   <folder>images</folder>
+ *   <filename>maksssksksss0.png</filename>
+ *   <size>
+ *     <width>512</width>
+ *     <height>366</height>
+ *   </size>
+ *   <object>
+ *     <x>79</x>
+ *     <y>105</y>
+ *   </object>
+ *   <object>
+ *     <x>185</x>
+ *     <y>100</y>
+ *   </object>
+ * </annotation>
+ * ```
+ */
+export function json_to_xml(
+  object: Record<string, any>,
+  options: {
+    /** default `''` */
+    initial_indent?: string
+    /** default `'  '` (2 spaces) */
+    indent_step?: string
+  } = {},
+): string {
+  return recursive_to_xml(object, {
+    initial_indent: options.initial_indent ?? '',
+    indent_step: options.indent_step ?? '  ',
+  })
+}
+
+function recursive_to_xml(
+  object: any,
+  options: {
+    initial_indent: string
+    indent_step: string
+  },
+): string {
+  if (object === null || object === undefined) {
+    return ''
+  }
+
+  switch (typeof object) {
+    case 'string':
+    case 'number':
+    case 'boolean':
+      return String(object)
+  }
+
+  if (Array.isArray(object)) {
+    return object.map(item => recursive_to_xml(item, options)).join('')
+  }
+
+  if (typeof object === 'object') {
+    const entries = Object.entries(object)
+    if (entries.length === 0) {
+      return ''
+    }
+    let current_indent = options.initial_indent
+    let next_indent = options.initial_indent + options.indent_step
+
+    let xml = ''
+    for (const [key, value] of entries) {
+      if (value === null || value === undefined) {
+        xml += `${current_indent}<${key} />\n`
+      } else if (
+        typeof value === 'string' ||
+        typeof value === 'number' ||
+        typeof value === 'boolean'
+      ) {
+        xml += `${current_indent}<${key}>${value}</${key}>\n`
+      } else if (Array.isArray(value)) {
+        for (const item of value) {
+          if (typeof item === 'object' && item !== null) {
+            xml += `${current_indent}<${key}>\n`
+            xml += recursive_to_xml(item, {
+              initial_indent: next_indent,
+              indent_step: options.indent_step,
+            })
+            xml += `${current_indent}</${key}>\n`
+          } else {
+            xml += `${current_indent}<${key}>${item}</${key}>\n`
+          }
+        }
+      } else if (typeof value === 'object') {
+        xml += `${current_indent}<${key}>\n`
+        xml += recursive_to_xml(value, {
+          initial_indent: next_indent,
+          indent_step: options.indent_step,
+        })
+        xml += `${current_indent}</${key}>\n`
+      }
+    }
+    return xml
+  }
+
+  return ''
+}
+
 let cdata_start_pattern = '<![CDATA['
 let cdata_end_pattern = ']]>'
 

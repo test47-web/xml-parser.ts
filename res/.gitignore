@@ -2,3 +2,5 @@ source
 actual.json
 expected.json
 input.xml
+to-xml-actual.xml
+to-xml-expected.xml
