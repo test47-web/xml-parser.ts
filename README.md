@@ -1,6 +1,6 @@
 # xml-parser.ts
 
-A lightweight, zero-dependency XML parser for TypeScript/JavaScript that converts XML strings to JavaScript objects.
+A lightweight, zero-dependency XML parser for TypeScript/JavaScript that converts XML strings to JavaScript objects and vice versa.
 
 [![npm Package Version](https://img.shields.io/npm/v/xml-parser.ts)](https://www.npmjs.com/package/xml-parser.ts)
 [![Minified Package Size](https://img.shields.io/bundlephobia/min/xml-parser.ts)](https://bundlephobia.com/package/xml-parser.ts)
@@ -11,7 +11,8 @@ A lightweight, zero-dependency XML parser for TypeScript/JavaScript that convert
 - **Zero dependencies** - Lightweight and fast
 - **TypeScript support** - Full type safety
 - **Isomorphic package** - Works in Node.js and browsers
-- **Simple API** - Single function to parse XML to JSON
+- **Bidirectional conversion** - XML ↔ JSON in both directions
+- **Simple API** - Two main functions for complete XML handling
 - **High performance** - [4x faster than popular alternatives](#performance-benchmark)
 
 ### Supported:
