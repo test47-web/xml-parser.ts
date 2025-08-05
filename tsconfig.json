@@ -10,5 +10,5 @@
     "declaration": true,
     "outDir": "dist"
   },
-  "exclude": ["dist", "scripts"]
+  "exclude": ["dist", "scripts", "test"]
 }
