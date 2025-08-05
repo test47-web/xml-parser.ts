@@ -70,19 +70,6 @@ export function xml_to_json(xml: string) {
   let properties: Properties = new Map()
   let offset = 0
 
-  // skip metadata, e.g. `<?xml version="1.0" encoding="UTF-8"?>`
-  let metadata_start_index = xml.indexOf('<?')
-  if (metadata_start_index != -1) {
-    offset = metadata_start_index
-    let metadata_end_index = xml.indexOf('?>', offset)
-    if (metadata_end_index == -1) {
-      throw new Error(
-        `Invalid XML: symbol "?>" not found for metadata closing, offset: ${offset}`,
-      )
-    }
-    offset = metadata_end_index + 2
-  }
-
   for (;;) {
     let element = parse_xml_element(xml, offset)
     add_property(properties, element.tag_name, element.properties)
