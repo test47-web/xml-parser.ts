@@ -95,6 +95,9 @@ export function xml_to_json(xml: string) {
   return Object.fromEntries(properties)
 }
 
+let cdata_start_pattern = '<![CDATA['
+let cdata_end_pattern = ']]>'
+
 /**
  * @description Parse a single root element from XML string.
  * - Metadata and comments should be removed before passing to this function.
@@ -130,18 +133,7 @@ export function parse_xml_element(xml: string, offset: number) {
   let text_content: string | null = null
 
   for (;;) {
-    for (;;) {
-      let cdata = parse_cdata(xml, offset)
-      if (cdata.content == null) {
-        break
-      }
-      if (text_content == null) {
-        text_content = ''
-      }
-      text_content += cdata.content
-      offset = cdata.offset
-    }
-
+    // Find the next '<' character
     let next_tag_index = xml.indexOf('<', offset)
     if (next_tag_index == -1) {
       throw new Error(
@@ -155,6 +147,29 @@ export function parse_xml_element(xml: string, offset: number) {
       break
     }
 
+    // Check if this is a CDATA section
+    if (
+      xml.slice(next_tag_index, next_tag_index + cdata_start_pattern.length) ===
+      cdata_start_pattern
+    ) {
+      // Parse CDATA
+      offset = next_tag_index + cdata_start_pattern.length
+      let end_index = xml.indexOf(cdata_end_pattern, offset)
+      if (end_index == -1) {
+        throw new Error(
+          `Invalid XML: symbol "]]>" not found for CDATA closing, offset: ${next_tag_index}`,
+        )
+      }
+      let cdata_content = xml.slice(offset, end_index)
+      if (text_content == null) {
+        text_content = ''
+      }
+      text_content += cdata_content
+      offset = end_index + cdata_end_pattern.length
+      continue
+    }
+
+    // Parse regular child element
     let child = parse_xml_element(xml, next_tag_index)
 
     let value
@@ -169,7 +184,6 @@ export function parse_xml_element(xml: string, offset: number) {
     add_property(properties, child.tag_name, value)
 
     offset = child.offset
-    continue
   }
 
   if (properties.size == 0 && text_content == null) {
@@ -182,42 +196,6 @@ export function parse_xml_element(xml: string, offset: number) {
     text_content,
     offset,
   }
-}
-
-let cdata_start_pattern = '<![CDATA['
-let cdata_end_pattern = ']]>'
-
-function parse_cdata(xml: string, offset: number) {
-  let content: string | null = null
-
-  let next_index = xml.indexOf('<', offset)
-  if (next_index == -1) {
-    // no more elements
-    return { content, offset }
-  }
-
-  let start_index = xml.indexOf(cdata_start_pattern, offset)
-  if (start_index == -1) {
-    // no CDATA found
-    return { content, offset }
-  }
-
-  if (next_index < start_index) {
-    // CDATA is far away
-    return { content, offset }
-  }
-
-  // CDATA found
-  offset = start_index + cdata_start_pattern.length
-  let end_index = xml.indexOf(cdata_end_pattern, offset)
-  if (end_index == -1) {
-    throw new Error(
-      `Invalid XML: symbol "]]>" not found for CDATA closing, offset: ${start_index}`,
-    )
-  }
-  content = xml.slice(offset, end_index)
-  offset = end_index + cdata_end_pattern.length
-  return { content, offset }
 }
 
 let comment_start_pattern = '<!--'
