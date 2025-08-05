@@ -1,4 +1,5 @@
 import './multi-root'
 import './metadata'
 import './comment'
+import './cdata'
 import '../scripts/benchmark'
