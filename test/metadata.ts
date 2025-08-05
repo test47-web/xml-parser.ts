@@ -2,6 +2,7 @@ import { xml_to_json } from '../src/core'
 
 let xml = /* xml */ `
 <?xml version="1.0" encoding="UTF-8"?>
+<?xml-stylesheet type="text/css" href="style.css"?>
 <object>
   <x>1</x>
   <y>2</y>

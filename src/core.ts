@@ -13,6 +13,7 @@
  * Not supported:
  * - Attributes
  * - Comments
+ * - Element with both child elements and text content
  *
  * @description
  * - Nested elements are parsed as object properties using tag name as property name.
@@ -60,6 +61,7 @@
  */
 export function xml_to_json(xml: string) {
   xml = remove_xml_comments(xml)
+  xml = remove_xml_metadata(xml)
 
   if (!xml.includes('<')) {
     throw new Error('Invalid XML: no element found')
@@ -94,7 +96,7 @@ export function xml_to_json(xml: string) {
 
 /**
  * @description Parse a single root element from XML string.
- * - Comments should be removed before passing to this function.
+ * - Metadata and comments should be removed before passing to this function.
  */
 export function parse_xml_element(xml: string, offset: number) {
   let tag_name_start_index = xml.indexOf('<', offset)
@@ -174,21 +176,38 @@ let comment_end_pattern = '-->'
 
 export function remove_xml_comments(xml: string): string {
   for (;;) {
-    let comment_start_index = xml.indexOf(comment_start_pattern)
-    if (comment_start_index == -1) {
+    let start_index = xml.indexOf(comment_start_pattern)
+    if (start_index == -1) {
       return xml
     }
-    let comment_end_index = xml.indexOf(
-      comment_end_pattern,
-      comment_start_index,
-    )
-    if (comment_end_index == -1) {
+    let end_index = xml.indexOf(comment_end_pattern, start_index)
+    if (end_index == -1) {
       throw new Error(
-        `Invalid XML: symbol "-->" not found for comment closing, offset: ${comment_start_index}`,
+        `Invalid XML: symbol "-->" not found for comment closing, offset: ${start_index}`,
       )
     }
-    let before = xml.slice(0, comment_start_index)
-    let after = xml.slice(comment_end_index + comment_end_pattern.length)
+    let before = xml.slice(0, start_index)
+    let after = xml.slice(end_index + comment_end_pattern.length)
+    xml = before + after
+  }
+}
+
+let metadata_start_pattern = '<?'
+let metadata_end_pattern = '?>'
+export function remove_xml_metadata(xml: string): string {
+  for (;;) {
+    let start_index = xml.indexOf(metadata_start_pattern)
+    if (start_index == -1) {
+      return xml
+    }
+    let end_index = xml.indexOf(metadata_end_pattern, start_index)
+    if (end_index == -1) {
+      throw new Error(
+        `Invalid XML: symbol "?>" not found for metadata closing, offset: ${start_index}`,
+      )
+    }
+    let before = xml.slice(0, start_index)
+    let after = xml.slice(end_index + metadata_end_pattern.length)
     xml = before + after
   }
 }
