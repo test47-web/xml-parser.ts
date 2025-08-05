@@ -8,6 +8,7 @@
  *
  * Ignored:
  * - Metadata
+ * - Comments
  *
  * Not supported:
  * - Attributes
@@ -58,6 +59,8 @@
  * ```
  */
 export function xml_to_json(xml: string) {
+  xml = remove_xml_comments(xml)
+
   if (!xml.includes('<')) {
     throw new Error('Invalid XML: no element found')
   }
@@ -89,6 +92,10 @@ export function xml_to_json(xml: string) {
   return Object.fromEntries(properties)
 }
 
+/**
+ * @description Parse a single root element from XML string.
+ * - Comments should be removed before passing to this function.
+ */
 export function parse_xml_element(xml: string, offset: number) {
   let tag_name_start_index = xml.indexOf('<', offset)
   if (tag_name_start_index == -1) {
@@ -159,6 +166,30 @@ export function parse_xml_element(xml: string, offset: number) {
     properties: Object.fromEntries(properties),
     text_content,
     offset,
+  }
+}
+
+let comment_start_pattern = '<!--'
+let comment_end_pattern = '-->'
+
+export function remove_xml_comments(xml: string): string {
+  for (;;) {
+    let comment_start_index = xml.indexOf(comment_start_pattern)
+    if (comment_start_index == -1) {
+      return xml
+    }
+    let comment_end_index = xml.indexOf(
+      comment_end_pattern,
+      comment_start_index,
+    )
+    if (comment_end_index == -1) {
+      throw new Error(
+        `Invalid XML: symbol "-->" not found for comment closing, offset: ${comment_start_index}`,
+      )
+    }
+    let before = xml.slice(0, comment_start_index)
+    let after = xml.slice(comment_end_index + comment_end_pattern.length)
+    xml = before + after
   }
 }
 
