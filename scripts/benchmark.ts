@@ -18,6 +18,7 @@ function test(name: string, parse: (xml: string) => object) {
   let end = performance.now()
   let total = end - start
   console.log(`${name}: ${total.toFixed(2)}ms`)
+  return total
 }
 
 let bar = '-'.repeat(25)
@@ -32,8 +33,10 @@ console.log(
 console.log(bar)
 
 let fast_xml_parser = new XMLParser()
-test('fast-xml-parser', xml => fast_xml_parser.parse(xml))
-test('xml-parser.ts', xml => xml_to_json(xml))
+let baseline = test('fast-xml-parser', xml => fast_xml_parser.parse(xml))
+let time_used = test('xml-parser.ts', xml => xml_to_json(xml))
+let speedup = baseline / time_used
+console.log(`Speedup: ${speedup.toFixed(2)}x`)
 
 console.log(bar)
 console.log('Correctness Check')
