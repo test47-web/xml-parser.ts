@@ -3,7 +3,8 @@
  *
  * Support:
  * - Nested elements
- * - Text
+ * - Text content (as string or number)
+ * - Multiple root elements
  *
  * Not support:
  * - Attributes
@@ -57,13 +58,21 @@ export function xml_to_json(xml: string) {
   if (!xml.includes('<')) {
     throw new Error('Invalid XML: no element found')
   }
-  let element = parse_element(xml, 0)
-  return {
-    [element.tag_name]: element.properties,
+  let properties: Properties = new Map()
+  let offset = 0
+  for (;;) {
+    let element = parse_xml_element(xml, offset)
+    add_property(properties, element.tag_name, element.properties)
+    offset = element.offset
+    if (offset == xml.length || xml.slice(offset).trim().length == 0) {
+      break
+    }
   }
+
+  return Object.fromEntries(properties)
 }
 
-function parse_element(xml: string, offset: number) {
+export function parse_xml_element(xml: string, offset: number) {
   let tag_name_start_index = xml.indexOf('<', offset)
   if (tag_name_start_index == -1) {
     throw new Error(
@@ -90,7 +99,7 @@ function parse_element(xml: string, offset: number) {
     )
   }
 
-  let properties = new Map<string, string | number | object>()
+  let properties: Properties = new Map()
 
   for (;;) {
     let next_tag_index = xml.indexOf('<', offset)
@@ -106,7 +115,7 @@ function parse_element(xml: string, offset: number) {
       break
     }
 
-    let child = parse_element(xml, next_tag_index)
+    let child = parse_xml_element(xml, next_tag_index)
 
     let value
     if (child.text_content != null) {
@@ -117,18 +126,7 @@ function parse_element(xml: string, offset: number) {
       value = child.properties
     }
 
-    if (!properties.has(child.tag_name)) {
-      // new property (single value)
-      properties.set(child.tag_name, value)
-    } else {
-      // existing property (array of values)
-      let existing_value = properties.get(child.tag_name)
-      if (Array.isArray(existing_value)) {
-        existing_value.push(value)
-      } else {
-        properties.set(child.tag_name, [existing_value, value])
-      }
-    }
+    add_property(properties, child.tag_name, value)
 
     offset = child.offset
     continue
@@ -144,6 +142,29 @@ function parse_element(xml: string, offset: number) {
     properties: Object.fromEntries(properties),
     text_content,
     offset,
+  }
+}
+
+type Properties = Map<string, string | number | object>
+
+function add_property(
+  properties: Properties,
+  tag_name: string,
+  value: string | number | object,
+) {
+  if (!properties.has(tag_name)) {
+    // new property (single value)
+    properties.set(tag_name, value)
+    return
+  }
+
+  let existing_value = properties.get(tag_name)
+  if (Array.isArray(existing_value)) {
+    // add to existing array
+    existing_value.push(value)
+  } else {
+    // wrap values into a new array
+    properties.set(tag_name, [existing_value, value])
   }
 }
 
