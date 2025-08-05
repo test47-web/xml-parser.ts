@@ -130,6 +130,49 @@ Converted JavaScript object:
 - **Mixed content** - Elements with both text and child elements
 - **XML entities** - No entity decoding (e.g., `&lt;`, `&gt;`)
 
+## Data Validation
+
+For runtime validation on parsed XML data, you can use [cast.ts](https://github.com/beenotung/cast.ts) - a lightweight runtime parser-based data validation library that also provides static type inference on the parsed result.
+
+The array parser is particularly useful for XML data as it can convert single or multiple values into an array, enabling unified handling on cases where XML elements might appear once or multiple times.
+
+```typescript
+import { xml_to_json } from 'xml-parser.ts'
+import { string, int, object, array } from 'cast.ts'
+
+// Define validation schema
+const annotationParser = object({
+  annotation: object({
+    folder: string(),
+    filename: string(),
+    size: object({
+      width: int(),
+      height: int(),
+    }),
+    object: array(
+      object({
+        name: string(),
+        bndbox: object({
+          xmin: int(),
+          ymin: int(),
+          xmax: int(),
+          ymax: int(),
+        }),
+      }),
+      { maybeSingle: true }, // Allows single object or array of objects
+    ),
+  }),
+})
+
+/* Parse and validate XML with full type inference */
+const xml = `...` // the XML string, from file or network
+const json = xml_to_json(xml) // the JavaScript object converted from XML string, with "any" type
+const data = annotationParser.parse(json) // the parsed JavaScript object, with full TypeScript type inference
+
+console.log('filename:', data.annotation.filename)
+console.log('object count:', data.annotation.object.length)
+```
+
 ## TypeScript Signature
 
 ### Core Functions
