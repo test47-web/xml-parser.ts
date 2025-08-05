@@ -1,7 +1,7 @@
 import { readdirSync, readFileSync, writeFileSync } from 'fs'
 import { join } from 'path'
 import { XMLParser } from 'fast-xml-parser'
-import { xml_to_json } from './core'
+import { xml_to_json } from '../src/core'
 
 let dir = 'res/source/annotations'
 let samples = readdirSync(dir).map(filename => {
