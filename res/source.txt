@@ -1,0 +1,5 @@
+Download from https://www.kaggle.com/datasets/andrewmvd/face-mask-detection
+
+then put into:
+- res/annotations/
+- res/images/
