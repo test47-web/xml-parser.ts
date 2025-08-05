@@ -29,6 +29,7 @@ console.log('file count:', samples.length)
 console.log(
   'total size:',
   samples.reduce((acc, curr) => acc + curr.xml.length, 0).toLocaleString(),
+  'bytes',
 )
 console.log(bar)
 

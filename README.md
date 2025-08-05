@@ -1,0 +1,185 @@
+# xml-parser.ts
+
+A lightweight, zero-dependency XML parser for TypeScript/JavaScript that converts XML strings to JavaScript objects.
+
+[![npm Package Version](https://img.shields.io/npm/v/xml-parser.ts)](https://www.npmjs.com/package/xml-parser.ts)
+[![Minified Package Size](https://img.shields.io/bundlephobia/min/xml-parser.ts)](https://bundlephobia.com/package/xml-parser.ts)
+[![Minified and Gzipped Package Size](https://img.shields.io/bundlephobia/minzip/xml-parser.ts)](https://bundlephobia.com/package/xml-parser.ts)
+
+## Features
+
+- **Zero dependencies** - Lightweight and fast
+- **TypeScript support** - Full type safety
+- **Isomorphic package** - Works in Node.js and browsers
+- **Simple API** - Single function to parse XML to JSON
+- **High performance** - [4x faster than popular alternatives](#performance-benchmark)
+
+### Supported:
+
+- Nested elements
+- Text content (as string or number)
+- Multiple root elements
+- CDATA sections
+- Self-closing elements
+
+### Ignored:
+
+- Metadata (e.g., `<?xml version="1.0"?>`)
+- Comments (e.g., `<!-- comment -->`)
+
+### Not supported:
+
+- Attributes
+- Element with both child elements and text content
+- XML comments inside CDATA
+
+## Performance Benchmark
+
+xml-parser.ts is significantly (4x) faster than a popular alternative [fast-xml-parser](https://github.com/NaturalIntelligence/fast-xml-parser) in parsing simple XML files.
+
+**Benchmark dataset:**  
+[Face Mask Detection dataset](https://www.kaggle.com/datasets/andrewmvd/face-mask-detection) (Pascal VOC annotation files)
+
+```
+Testing Dataset
+file count: 853
+total size: 1,576,046 bytes
+-------------------------
+fast-xml-parser: 206.42ms
+xml-parser.ts: 47.75ms
+Speedup: 4.32x
+```
+
+**Note:** This performance advantage comes from a trade off of supporting only a subset of XML features that are sufficient for common use cases like machine learning label files (e.g., Pascal VOC format). The parser intentionally omits complex XML features like attributes, mixed content, and XML entities to maintain simplicity and speed.
+
+## Installation
+
+```bash
+npm install xml-parser.ts
+```
+
+You can also install `xml-parser.ts` with [pnpm](https://pnpm.io/), [yarn](https://yarnpkg.com/), or [slnpm](https://github.com/beenotung/slnpm)
+
+## Usage Example
+
+```typescript
+import { xml_to_json } from 'xml-parser.ts'
+
+const xml = `
+<annotation>
+  <folder>images</folder>
+  <filename>maksssksksss0.png</filename>
+  <size>
+    <width>512</width>
+    <height>366</height>
+  </size>
+  <object>
+    <x>79</x>
+    <y>105</y>
+  </object>
+  <object>
+    <x>185</x>
+    <y>100</y>
+  </object>
+</annotation>
+`
+
+const result = xml_to_json(xml)
+console.log(result)
+```
+
+Output:
+
+```javascript
+{
+  annotation: {
+    folder: "images",
+    filename: "maksssksksss0.png",
+    size: {
+      width: 512,
+      height: 366,
+    },
+    object: [
+      { x: 79, y: 105 },
+      { x: 185, y: 100 }
+    ]
+  }
+}
+```
+
+## Supported XML Features
+
+### ✅ Supported
+
+- **Nested elements** - Parsed as object properties
+- **Text content** - Automatically converted to string or number
+- **Multiple root elements** - All root elements are included
+- **CDATA sections** - Content is preserved as text
+- **Self-closing elements** - Parsed as empty objects
+- **XML comments** - Automatically removed
+- **XML metadata** - Automatically removed
+
+### ❌ Not Supported
+
+- **Attributes** - Element attributes are ignored
+- **Mixed content** - Elements with both text and child elements
+- **XML entities** - No entity decoding (e.g., `&lt;`, `&gt;`)
+
+## TypeScript Signature
+
+### Core Function
+
+```typescript
+/**
+ * Parse XML string to JavaScript object.
+ *
+ * Converts XML elements to object properties using tag names as keys.
+ * Text content is automatically converted to strings or numbers.
+ * Multiple elements with the same name become arrays.
+ *
+ * @param xml - The XML string to parse
+ * @returns JavaScript object representation of the XML structure
+ * @throws Error if the XML is invalid or malformed
+ */
+export function xml_to_json(xml: string): Record<string, any>
+```
+
+### Helper Functions
+
+```typescript
+/**
+ * Parse a single root element from XML string.
+ * - Metadata and comments should be removed before passing to this function.
+ */
+export function parse_xml_element(xml: string, offset: number): ParsedElement
+
+/**
+ * Remove XML comments from the input string.
+ * Removes all occurrences of <!-- ... --> patterns.
+ */
+export function remove_xml_comments(xml: string): string
+
+/**
+ * Remove XML metadata from the input string.
+ * Removes all occurrences of <? ... ?> patterns (e.g., <?xml version="1.0"?>).
+ */
+export function remove_xml_metadata(xml: string): string
+
+interface ParsedElement {
+  tag_name: string
+  properties: Record<string, any>
+  text_content: string | number | null
+  offset: number
+}
+```
+
+## License
+
+This project is licensed with [BSD-2-Clause](./LICENSE)
+
+This is free, libre, and open-source software. It comes down to four essential freedoms [[ref]](https://seirdy.one/2021/01/27/whatsapp-and-the-domestication-of-users.html#fnref:2):
+
+- The freedom to run the program as you wish, for any purpose
+- The freedom to study how the program works, and change it so it does your computing as you wish
+- The freedom to redistribute copies so you can help others
+- The freedom to distribute copies of your modified versions to others

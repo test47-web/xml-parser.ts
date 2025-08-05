@@ -2,10 +2,36 @@
   "name": "xml-parser.ts",
   "version": "0.0.0",
   "type": "commonjs",
-  "description": "",
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
+  "description": "A lightweight, zero-dependency XML parser for TypeScript/JavaScript that converts XML strings to JavaScript objects. Supports nested elements, text content, CDATA sections, self-closing elements, and automatically handles XML comments and metadata.",
+  "keywords": [
+    "xml",
+    "parser",
+    "typescript",
+    "javascript",
+    "json",
+    "converter",
+    "xml-to-json",
+    "xml-parser",
+    "zero-dependency",
+    "lightweight",
+    "isomorphic",
+    "node",
+    "browser"
+  ],
+  "author": {
+    "name": "Beeno Tung",
+    "email": "aabbcc1241@yahoo.com.hk",
+    "url": "https://beeno-tung.surge.sh"
+  },
+  "license": "BSD-2-Clause",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/beenotung/xml-parser.ts.git"
+  },
+  "homepage": "https://github.com/beenotung/xml-parser.ts#readme",
+  "bugs": {
+    "url": "https://github.com/beenotung/xml-parser.ts/issues"
+  },
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "files": [
