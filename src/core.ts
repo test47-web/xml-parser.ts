@@ -6,6 +6,7 @@
  * - Text content (as string or number)
  * - Multiple root elements
  * - CDATA
+ * - Self-closing elements
  *
  * Ignored:
  * - Metadata
@@ -104,10 +105,23 @@ export function parse_xml_element(xml: string, offset: number) {
       `Invalid XML: symbol ">" not found for element opening, offset: ${offset}`,
     )
   }
-  let tag_name = xml.slice(tag_name_start_index + 1, tag_name_end_index)
+  let tag_content = xml.slice(tag_name_start_index + 1, tag_name_end_index)
   let content_start_index = tag_name_end_index + 1
   offset = content_start_index
 
+  // Check if this is a self-closing element (e.g. '<box/>')
+  if (tag_content.endsWith('/')) {
+    // Self-closing element
+    let tag_name = tag_content.slice(0, -1).trim()
+    return {
+      tag_name,
+      properties: {},
+      text_content: null,
+      offset,
+    }
+  }
+
+  let tag_name = tag_content
   let closing_tag = `</${tag_name}>`
   let element_end_index = xml.indexOf(closing_tag, offset)
   if (element_end_index == -1) {
