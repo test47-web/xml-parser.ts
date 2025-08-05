@@ -1,6 +1,6 @@
 {
   "name": "xml-parser.ts",
-  "version": "0.0.0",
+  "version": "1.0.0",
   "type": "commonjs",
   "description": "A lightweight, zero-dependency XML parser for TypeScript/JavaScript that converts XML strings to JavaScript objects and vice versa.",
   "keywords": [
