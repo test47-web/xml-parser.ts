@@ -47,6 +47,7 @@ for (let sample of samples) {
     console.log(
       `Error: fast-xml-parser and xml-parser.ts results are different for ${dir}/${sample.filename}`,
     )
+    writeFileSync('res/input.xml', sample.xml)
     writeFileSync(
       'res/expected.json',
       JSON.stringify(fast_xml_parser_result, null, 2),
