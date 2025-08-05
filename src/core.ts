@@ -122,7 +122,7 @@ export function parse_xml_element(xml: string, offset: number) {
     }
   }
 
-  let tag_name = tag_content
+  let tag_name = tag_content.trim()
   let closing_tag = `</${tag_name}>`
   let element_end_index = xml.indexOf(closing_tag, offset)
   if (element_end_index == -1) {
