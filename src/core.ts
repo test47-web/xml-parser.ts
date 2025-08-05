@@ -16,6 +16,7 @@
  * - Attributes
  * - Comments
  * - Element with both child elements and text content
+ * - XML comments inside CDATA
  *
  * @description
  * - Nested elements are parsed as object properties using tag name as property name.
